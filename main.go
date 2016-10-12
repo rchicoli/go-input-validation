@@ -25,13 +25,15 @@ type InputValidation interface {
 }
 
 var f http.HandlerFunc = func(w http.ResponseWriter, r *http.Request) {
-	var person *Person
+	//var person *Person
+	person := &Person{}
 	err := decodeAndValidate(r, person)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(fmt.Sprintf("%v", err)))
 		return
 	}
+	//w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("OK"))
 }
@@ -46,7 +48,7 @@ func decodeAndValidate(r *http.Request, p *Person) error {
 
 func main() {
 	srv := &http.Server{
-		Addr:    ":8080",
+		Addr:    ":1234",
 		Handler: f,
 	}
 	srv.ListenAndServe()
