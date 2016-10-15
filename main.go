@@ -7,10 +7,26 @@ import (
 	"regexp"
 )
 
+// Request
+// { "email": "test01@example.com" }
+
+// Response
+//{ "validation":
+//  {
+//    "email": "test01@example.com",
+//    "check": "VALID"]
+//  }
+//}
+
 var emailValidation = regexp.MustCompile(`\A[\w+\-.]+@[a-z\d\-]+(\.[a-z]+)*\.[a-z]+\z`)
 
 type Person struct {
 	Email string `json:"email"`
+	Check string `json:"check"`
+}
+
+type Validation struct {
+	Person Person `json:"validation"`
 }
 
 func Validate(p Person) error {
@@ -27,15 +43,21 @@ type InputValidation interface {
 var f http.HandlerFunc = func(w http.ResponseWriter, r *http.Request) {
 	//var person *Person
 	person := &Person{}
+
 	err := decodeAndValidate(r, person)
 	if err != nil {
+		person.Check = "NOT VALID"
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(fmt.Sprintf("%v", err)))
-		return
+	} else {
+		person.Check = "VALID"
+		w.WriteHeader(http.StatusOK)
 	}
-	//w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("OK"))
+	var buf []byte
+	validation := &Validation{*person}
+
+	buf, _ = json.Marshal(validation)
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.Write([]byte(buf))
 }
 
 func decodeAndValidate(r *http.Request, p *Person) error {
@@ -48,7 +70,7 @@ func decodeAndValidate(r *http.Request, p *Person) error {
 
 func main() {
 	srv := &http.Server{
-		Addr:    ":1234",
+		Addr:    ":8080",
 		Handler: f,
 	}
 	srv.ListenAndServe()
