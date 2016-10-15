@@ -41,6 +41,13 @@ type InputValidation interface {
 }
 
 var f http.HandlerFunc = func(w http.ResponseWriter, r *http.Request) {
+
+	if r.Method != "POST" {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("HEALTHY"))
+		return
+	}
+
 	//var person *Person
 	person := &Person{}
 
