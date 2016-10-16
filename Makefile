@@ -1,4 +1,4 @@
-NAME = rchicoli/docker-go-input-validation
+NAME = rchicoli/go-input-validation
 VERSION = 0.0.4-dev
 WORKDIR = /go/src/go-input-validation
 BINARY = go-input-validation
