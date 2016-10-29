@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"regexp"
+	"runtime"
 )
 
 // Request
@@ -21,8 +22,9 @@ import (
 var emailValidation = regexp.MustCompile(`\A[\w+\-.]+@[a-z\d\-]+(\.[a-z]+)*\.[a-z]+\z`)
 
 type Person struct {
-	Email string `json:"email"`
-	Check string `json:"check"`
+	Email      string      `json:"email"`
+	Check      string      `json:"check"`
+	Additional interface{} `json:"additional,omitempty"`
 }
 
 type Validation struct {
@@ -53,7 +55,7 @@ var f http.HandlerFunc = func(w http.ResponseWriter, r *http.Request) {
 
 	err := decodeAndValidate(r, person)
 	if err != nil {
-		person.Check = "NOT VALID"
+		person.Check = err.Error()
 		w.WriteHeader(http.StatusBadRequest)
 	} else {
 		person.Check = "VALID"
@@ -76,8 +78,10 @@ func decodeAndValidate(r *http.Request, p *Person) error {
 }
 
 func main() {
+	runtime.GOMAXPROCS(4)
+
 	srv := &http.Server{
-		Addr:    ":8080",
+		Addr:    ":1234",
 		Handler: f,
 	}
 	srv.ListenAndServe()
